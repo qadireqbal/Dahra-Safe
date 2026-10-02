@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dhara-Safe — Hyper-Local Flood & Landslide Early Warning</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ============================================================ TOP BAR -->
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> DHARA-SAFE <span class="text-muted" style="font-weight:400;font-size:12px;margin-left:4px;">LIVE</span></div>
+
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="Search state, district or village — e.g. Bihar, Joshimath, Wayanad" autocomplete="off">
+      <div class="search-results" id="search-results"></div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="pill" id="gps-status"><span style="width:6px;height:6px;border-radius:50%;background:#6b7996;display:inline-block;"></span> GPS: idle</div>
+      <div class="pill"><span id="pipeline-dot" style="width:6px;height:6px;border-radius:50%;background:#2fbf71;display:inline-block;"></span> <span id="next-cycle-label">pipeline live</span></div>
+      <div class="lang-toggle">
+        <button data-lang="en" class="active">EN</button>
+        <button data-lang="hi">हिं</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-item active" data-page="home"><span class="ic">&#9679;</span><span data-i18n="nav.home">Dashboard</span></div>
+    <div class="nav-item" data-page="prediction"><span class="ic">&#9889;</span><span data-i18n="nav.prediction">Prediction</span></div>
+    <div class="nav-item" data-page="risk"><span class="ic">&#9650;</span><span data-i18n="nav.risk">Risk Analysis</span></div>
+    <div class="nav-item" data-page="weather"><span class="ic">&#9729;</span><span data-i18n="nav.weather">Live Weather</span></div>
+    <div class="nav-item" data-page="monitor"><span class="ic">&#9881;</span><span data-i18n="nav.monitor">Model Monitor</span></div>
+
+    <div class="nav-section-label">Safety</div>
+    <div class="nav-item" data-page="emergency"><span class="ic">&#9888;</span><span data-i18n="nav.emergency">Emergency &amp; SOS</span></div>
+
+    <div class="nav-section-label">Account</div>
+    <div class="nav-item" data-page="account"><span class="ic">&#9782;</span><span data-i18n="nav.account">Register</span></div>
+  </div>
+
+  <!-- ============================================================ MAIN -->
+  <div class="main">
+
+    <div class="offline-banner" id="offline-banner">
+      You're offline. Showing last synchronized warning from <span id="offline-timestamp">—</span>. This is not a live prediction.
+    </div>
+
+    <!-- ============================================================ HOME (dashboard + map together) -->
+    <div class="page active" id="page-home">
+      <div class="page-header">
+        <h1 data-i18n="home.title">National Risk Overview</h1>
+        <p data-i18n="home.subtitle">Hyper-local flash-flood &amp; landslide risk across monitored villages/wards. Refreshes every 15 minutes.</p>
+      </div>
+
+      <div class="callout" id="home-updated-callout">Loading latest pipeline cycle…</div>
+
+      <div class="grid grid-4" style="margin-bottom:14px;">
+        <div class="stat-tile low"><div class="num" id="count-low">–</div><div class="label">LOW risk locations</div></div>
+        <div class="stat-tile medium"><div class="num" id="count-medium">–</div><div class="label">MEDIUM risk locations</div></div>
+        <div class="stat-tile high"><div class="num" id="count-high">–</div><div class="label">HIGH risk locations</div></div>
+        <div class="stat-tile critical"><div class="num" id="count-critical">–</div><div class="label">CRITICAL risk locations</div></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-title">Live Map <span class="text-muted" style="text-transform:none;">click a marker for details · colored by risk</span></div>
+        <div id="map"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Highest Risk Areas</div>
+        <div id="home-risk-list"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================ PREDICTION (flagship — simple language) -->
+    <div class="page" id="page-prediction">
+      <div class="page-header">
+        <h1 data-i18n="prediction.title">Prediction</h1>
+        <p>The two things that matter most: how likely is a disaster, and how much time is there.</p>
+      </div>
+
+      <div class="panel" style="margin-bottom:14px;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span class="text-muted text-sm">Showing:</span>
+          <span id="prediction-location-name" style="font-weight:600;">Pick a location using the search bar above, or allow GPS access</span>
+          <button class="btn secondary" id="prediction-use-gps" style="margin-left:auto;">📍 Use my location</button>
+        </div>
+      </div>
+
+      <div id="prediction-empty" class="callout">Search a location above, or tap "Use my location", to see its prediction.</div>
+
+      <div id="prediction-content" style="display:none;">
+        <div class="prediction-hero" id="prediction-hero">
+          <div class="prediction-chance">
+            <div class="chance-label">Chance of a flood/landslide happening</div>
+            <div class="chance-value" id="pred-chance">–%</div>
+            <div class="chance-band" id="pred-band"></div>
+          </div>
+          <div class="prediction-time">
+            <div class="chance-label">Time before it could get dangerous</div>
+            <div class="time-value" id="pred-time">–</div>
+            <div class="text-muted text-sm" id="pred-time-note">This is the model's estimate, not a guarantee — always follow official evacuation orders.</div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:14px;">
+          <div class="panel-title">In simple words</div>
+          <p id="pred-plain-text" style="font-size:15px;line-height:1.6;"></p>
+        </div>
+
+        <div class="grid grid-2" style="margin-top:14px;">
+          <div class="panel">
+            <div class="panel-title">How sure is this? <span class="glossary-term" data-term="accuracy">?</span></div>
+            <p class="text-sm text-muted" id="pred-accuracy-text"></p>
+          </div>
+          <div class="panel">
+            <div class="panel-title">What should I do right now?</div>
+            <div id="pred-quick-dos"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ RISK ANALYSIS (detailed — needs a city first) -->
+    <div class="page" id="page-risk">
+      <div class="page-header">
+        <h1 data-i18n="risk.title">Risk Analysis</h1>
+        <p>Full technical breakdown — feature importance, formula, IoT readings, model accuracy.</p>
+      </div>
+
+      <div class="panel" id="risk-city-prompt" style="margin-bottom:14px;">
+        <div class="panel-title">Which city or village?</div>
+        <div style="display:flex;gap:8px;">
+          <input id="risk-city-input" placeholder="Type a city, district or village name…" style="flex:1;background:var(--bg-raised);border:1px solid var(--border);color:var(--text-primary);padding:9px 10px;border-radius:5px;">
+          <button class="btn" id="risk-city-go">Go</button>
+        </div>
+        <div id="risk-city-results" style="margin-top:8px;"></div>
+      </div>
+
+      <div id="risk-detail" style="display:none;">
+        <div class="grid grid-main-side">
+          <div class="panel">
+            <div class="panel-title" id="risk-detail-title">—</div>
+            <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:10px;">
+              <div class="num" style="font-family:var(--font-display);font-size:40px;" id="risk-detail-score">–</div>
+              <div id="risk-detail-badge"></div>
+              <div class="text-muted text-sm" id="risk-detail-updated"></div>
+            </div>
+            <div class="text-sm text-muted">Percentage is a calibrated risk probability, not a certainty.</div>
+            <div class="divider"></div>
+            <div class="grid grid-2">
+              <div><div class="text-muted text-sm">Flood probability</div><div class="mono" id="risk-flood-p" style="font-size:18px;">–</div></div>
+              <div><div class="text-muted text-sm">Landslide probability</div><div class="mono" id="risk-slide-p" style="font-size:18px;">–</div></div>
+            </div>
+            <div class="divider"></div>
+            <div class="text-muted text-sm">Model-estimated lead time (not guaranteed)</div>
+            <div class="mono" id="risk-lead-time" style="font-size:16px;">–</div>
+            <div class="text-muted text-sm" id="risk-lead-time-formula" style="margin-top:4px;"></div>
+            <div class="divider"></div>
+            <div class="text-muted text-sm">Why this score — main contributing factors</div>
+            <ul class="reason-list" id="risk-reasons"></ul>
+          </div>
+          <div class="panel">
+            <div class="panel-title">Feature Importance (Random Forest <span class="glossary-term" data-term="random_forest">?</span>)</div>
+            <canvas id="chart-importance" height="220"></canvas>
+            <div class="divider"></div>
+            <div class="panel-title">Risk Trend (recent cycles)</div>
+            <canvas id="chart-trend" height="150"></canvas>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="panel">
+          <div class="panel-title">How this score was calculated <span class="glossary-term" data-term="formula">?</span></div>
+          <div id="risk-formula-block"></div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="panel">
+          <div class="panel-title">IoT Sensor Readings <span class="demo-tag" id="iot-source-tag">DEMO</span></div>
+          <p class="text-sm text-muted">No physical sensor hardware is deployed for this demo. Soil moisture uses a real satellite-derived estimate (NASA POWER) where reachable; water level/rain-gauge readings are simulated and clearly marked.</p>
+          <div class="grid grid-3" id="iot-readings" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="panel">
+          <div class="panel-title">Model Accuracy — 2025 Real-Event Validation <span class="glossary-term" data-term="validation">?</span></div>
+          <div id="validation-block"></div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="panel">
+          <div class="panel-title">Proof this is a real trained model <span class="text-muted text-sm" style="text-transform:none;">not hardcoded if/else rules</span></div>
+          <div id="model-info-block"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ LIVE WEATHER (pure live data only) -->
+    <div class="page" id="page-weather">
+      <div class="page-header">
+        <h1 data-i18n="weather.title">Live Weather</h1>
+        <p>Only real-time readings here — no predictions. Search a location above to load its card.</p>
+      </div>
+      <div id="weather-empty" class="callout">Search for a location above to load its live weather card.</div>
+      <div id="weather-card" style="display:none;">
+        <div class="grid grid-4">
+          <div class="stat-tile"><div class="num" id="w-temp">–</div><div class="label">Temperature (°C)</div></div>
+          <div class="stat-tile"><div class="num" id="w-rain24">–</div><div class="label">24h rainfall (mm)</div></div>
+          <div class="stat-tile"><div class="num" id="w-humidity">–</div><div class="label">Humidity (%)</div></div>
+          <div class="stat-tile"><div class="num" id="w-forecast">–</div><div class="label">6h forecast rain (mm)</div></div>
+        </div>
+        <div class="grid grid-4" style="margin-top:14px;">
+          <div class="stat-tile"><div class="num" id="w-wind">–</div><div class="label">Wind speed (km/h)</div></div>
+          <div class="stat-tile"><div class="num" id="w-gusts">–</div><div class="label">Wind gusts (km/h)</div></div>
+          <div class="stat-tile"><div class="num" id="w-dewpoint">–</div><div class="label">Dew point (°C)</div></div>
+          <div class="stat-tile"><div class="num" id="w-pressure">–</div><div class="label">Pressure (hPa)</div></div>
+        </div>
+        <div class="grid grid-4" style="margin-top:14px;">
+          <div class="stat-tile"><div class="num" id="w-uv">–</div><div class="label">UV index</div></div>
+          <div class="stat-tile"><div class="num" id="w-visibility">–</div><div class="label">Visibility (km)</div></div>
+          <div class="stat-tile"><div class="num" id="w-cloud">–</div><div class="label">Cloud cover (%)</div></div>
+          <div class="stat-tile"><div class="num" id="w-winddir">–</div><div class="label">Wind direction (°)</div></div>
+        </div>
+        <div id="w-extreme-alert" class="callout warn" style="display:none;margin-top:14px;">⚠️ Extreme rainfall indicator triggered for this location.</div>
+        <div class="panel" style="margin-top:14px;">
+          <div class="panel-title">Data source</div>
+          <div id="w-source-info" class="text-sm text-muted"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ MODEL MONITOR -->
+    <div class="page" id="page-monitor">
+      <div class="page-header">
+        <h1 data-i18n="monitor.title">Model Monitor</h1>
+        <p>Backend pipeline visibility — what the model is doing right now, every 15 minutes.</p>
+      </div>
+      <div class="grid grid-main-side">
+        <div class="panel">
+          <div class="panel-title">Live Model Activity</div>
+          <div class="activity-feed" id="activity-feed"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Data Source Status</div>
+          <div id="source-status-list"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="panel">
+        <div class="panel-title">
+          Real-World Validation — Documented Events vs Our Predictions
+          <button class="btn secondary" id="hist-validation-refresh" style="float:right;padding:4px 10px;font-size:11px;">Run fresh check</button>
+        </div>
+        <p class="text-sm text-muted">For judges: these are <b>real, documented flood/landslide events</b> from the past year, each cited to a news/Wikipedia source (click to verify). Real historical weather for the exact date/place is pulled live from Open-Meteo's Archive API and run through our actual trained model — not a synthetic test.</p>
+        <div id="hist-validation-summary" class="grid grid-4" style="margin:14px 0;"></div>
+        <div id="hist-validation-table"></div>
+        <div id="hist-validation-note" class="text-muted text-sm" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================ EMERGENCY & SOS (merged) -->
+    <div class="page" id="page-emergency">
+      <div class="page-header">
+        <h1 data-i18n="emergency.title">Emergency &amp; SOS</h1>
+        <p>Nearest hospitals/police/fire, official contacts, and a way to alert people nearby — with an offline-capable fallback.</p>
+      </div>
+
+      <div class="panel" style="margin-bottom:14px;">
+        <button class="sos-btn" id="sos-trigger">🚨 SEND SOS ALERT (needs internet)</button>
+        <div class="divider"></div>
+        <div class="grid grid-2">
+          <div class="form-field"><label>Name</label><input id="sos-name" placeholder="Your name"></div>
+          <div class="form-field"><label>Place</label><input id="sos-place" placeholder="e.g. Chamoli, Uttarakhand"></div>
+        </div>
+        <div class="form-field"><label>Send to a registered number (optional) <span class="text-muted text-sm" style="text-transform:none;">a family member or emergency contact \u2014 sends a real SMS</span></label><input id="sos-notify-phone" placeholder="10-digit mobile number"></div>
+        <div class="text-muted text-sm">Coordinates are captured from your browser's location permission when you press SOS.</div>
+        <div id="sos-result" style="margin-top:12px;"></div>
+
+        <div class="divider"></div>
+        <div class="panel-title">No internet? Use your phone's signal instead <span class="demo-tag" style="background:var(--risk-low-soft);color:var(--risk-low);">WORKS OFFLINE</span></div>
+        <p class="text-sm text-muted">Floods often knock out internet before phone signal (call/SMS). These buttons use your own phone's calling/messaging app directly — no internet needed, just cellular signal.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+          <a class="btn danger" href="tel:112" style="text-decoration:none;display:inline-block;">📞 Call 112 (Emergency)</a>
+          <a class="btn secondary" id="sos-sms-link" href="#" style="text-decoration:none;display:inline-block;">✉️ Send SOS by SMS</a>
+        </div>
+        <div class="text-muted text-sm" style="margin-top:8px;">The SMS button opens your phone's messaging app with your name, place and last-known location pre-filled — you just hit send.</div>
+      </div>
+
+      <div class="grid grid-main-side">
+        <div class="panel">
+          <div class="panel-title">Nearby Facilities <span id="facility-source-tag"></span></div>
+          <div id="map-emergency" style="height:300px;border-radius:5px;border:1px solid var(--border);"></div>
+          <div id="facility-list" style="margin-top:12px;"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Emergency Contacts</div>
+          <div id="contacts-list"></div>
+          <div class="divider"></div>
+          <div class="panel-title">Active SOS Alerts</div>
+          <div id="active-sos-list"></div>
+          <div class="divider"></div>
+          <div class="panel-title">Nearby users <span class="text-muted text-sm" style="text-transform:none;">visible automatically when an area turns CRITICAL</span></div>
+          <div id="critical-area-users"><div class="text-muted text-sm">No CRITICAL area selected yet.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ ACCOUNT (simplified register only) -->
+    <div class="page" id="page-account">
+      <div class="page-header">
+        <h1 data-i18n="account.title">Register</h1>
+        <p>So we can text you a real alert if a disaster is predicted near you. Takes 10 seconds.</p>
+      </div>
+      <div class="panel" style="max-width:480px;">
+        <div class="form-field"><label>Name <span style="color:var(--risk-critical);">*</span></label><input id="reg-name"></div>
+        <div class="form-field"><label>Mobile number <span style="color:var(--risk-critical);">*</span></label><input id="reg-phone" placeholder="10-digit Indian mobile number"></div>
+        <div class="form-field"><label>Email (optional)</label><input id="reg-email" type="email"></div>
+        <button class="btn" id="reg-submit">Register for alerts</button>
+        <div id="reg-result" style="margin-top:10px;"></div>
+        <div class="text-muted text-sm" style="margin-top:10px;">Your location is captured automatically (with permission) so we can tell if you're near a CRITICAL area. A real SMS is sent only when a disaster is predicted nearby — not for marketing.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ FLOATING DHARA-AI CHAT -->
+<div id="chat-float-btn" title="Ask Dhara-AI">
+  <span id="chat-float-icon">💬</span>
+</div>
+<div id="chat-panel">
+  <div id="chat-panel-header">
+    <span>Dhara-AI</span>
+    <span class="text-muted text-sm" style="font-weight:400;">predictions · news · questions</span>
+    <span id="chat-panel-close">✕</span>
+  </div>
+  <div class="chat-log" id="chat-log"></div>
+  <div style="padding:10px;border-top:1px solid var(--border);">
+    <div style="display:flex;gap:8px;">
+      <input id="chat-input" placeholder='Ask anything — city risk, news, or "am I safe?"' style="flex:1;background:var(--bg-raised);border:1px solid var(--border);color:var(--text-primary);padding:9px 10px;border-radius:5px;">
+      <button class="btn" id="chat-send">Ask</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
