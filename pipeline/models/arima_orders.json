@@ -1,0 +1,210 @@
+{
+  "Andhra Pradesh": {
+    "order": [
+      1,
+      1,
+      1
+    ],
+    "aic": 2740.7
+  },
+  "Arunachal Pradesh": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2859.9
+  },
+  "Assam": {
+    "order": [
+      2,
+      1,
+      1
+    ],
+    "aic": 2795.9
+  },
+  "Bihar": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2250.2
+  },
+  "Chhattisgarh": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2843.6
+  },
+  "Goa": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2845.2
+  },
+  "Himachal Pradesh": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2454.4
+  },
+  "Jammu and Kashmir": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2520.6
+  },
+  "Karnataka": {
+    "order": [
+      2,
+      1,
+      1
+    ],
+    "aic": 2587.7
+  },
+  "Kerala": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2441.3
+  },
+  "Ladakh": {
+    "order": [
+      1,
+      1,
+      1
+    ],
+    "aic": 2892.9
+  },
+  "Madhya Pradesh": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 3202.2
+  },
+  "Maharashtra": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2457.6
+  },
+  "Manipur": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2855.7
+  },
+  "Meghalaya": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2721.5
+  },
+  "Mizoram": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2837.8
+  },
+  "Nagaland": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2781.4
+  },
+  "Odisha": {
+    "order": [
+      2,
+      1,
+      1
+    ],
+    "aic": 2634.8
+  },
+  "Punjab": {
+    "order": [
+      1,
+      1,
+      1
+    ],
+    "aic": 2953.3
+  },
+  "Sikkim": {
+    "order": [
+      2,
+      1,
+      1
+    ],
+    "aic": 2837.4
+  },
+  "Tamil Nadu": {
+    "order": [
+      1,
+      1,
+      1
+    ],
+    "aic": 3112.8
+  },
+  "Telangana": {
+    "order": [
+      1,
+      1,
+      1
+    ],
+    "aic": 2647.9
+  },
+  "Tripura": {
+    "order": [
+      1,
+      1,
+      1
+    ],
+    "aic": 2994.0
+  },
+  "Uttar Pradesh": {
+    "order": [
+      2,
+      1,
+      1
+    ],
+    "aic": 2637.8
+  },
+  "Uttarakhand": {
+    "order": [
+      2,
+      1,
+      1
+    ],
+    "aic": 2256.1
+  },
+  "West Bengal": {
+    "order": [
+      0,
+      1,
+      1
+    ],
+    "aic": 2512.0
+  }
+}

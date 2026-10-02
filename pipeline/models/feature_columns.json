@@ -1,0 +1,21 @@
+[
+  "rainfall_1h",
+  "rainfall_3h",
+  "rainfall_6h",
+  "rainfall_12h",
+  "rainfall_24h",
+  "rainfall_72h",
+  "rainfall_forecast_6h",
+  "runoff_mm",
+  "runoff_ratio",
+  "soil_moisture",
+  "elevation",
+  "slope",
+  "river_level",
+  "river_rate_of_rise",
+  "river_distance_km",
+  "earthquake_modifier",
+  "glacier_modifier",
+  "historical_flood_count",
+  "historical_landslide_count"
+]

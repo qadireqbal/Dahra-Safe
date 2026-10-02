@@ -1,0 +1,188 @@
+{
+  "validated_on": "2025 synthetic-but-realistic held-out year (see generate_dataset.py docstring \u2014 replace with real 2025 IMD/CWC/NDMA event records before reporting this number to judges as real-world accuracy)",
+  "arima_walk_forward": {
+    "Andhra Pradesh": {
+      "rmse": 10.598,
+      "mae": 7.751,
+      "nse": -0.392,
+      "n_points": 22
+    },
+    "Arunachal Pradesh": {
+      "rmse": 8.79,
+      "mae": 6.607,
+      "nse": 0.671,
+      "n_points": 22
+    },
+    "Assam": {
+      "rmse": 8.02,
+      "mae": 5.964,
+      "nse": 0.532,
+      "n_points": 22
+    },
+    "Bihar": {
+      "rmse": 10.963,
+      "mae": 5.676,
+      "nse": 0.506,
+      "n_points": 22
+    },
+    "Chhattisgarh": {
+      "rmse": 8.306,
+      "mae": 5.644,
+      "nse": -0.021,
+      "n_points": 22
+    },
+    "Goa": {
+      "rmse": 10.369,
+      "mae": 7.326,
+      "nse": -0.358,
+      "n_points": 22
+    },
+    "Himachal Pradesh": {
+      "rmse": 6.947,
+      "mae": 4.394,
+      "nse": 0.483,
+      "n_points": 22
+    },
+    "Jammu and Kashmir": {
+      "rmse": 11.558,
+      "mae": 6.575,
+      "nse": 0.393,
+      "n_points": 22
+    },
+    "Karnataka": {
+      "rmse": 7.408,
+      "mae": 5.217,
+      "nse": 0.623,
+      "n_points": 22
+    },
+    "Kerala": {
+      "rmse": 7.94,
+      "mae": 5.38,
+      "nse": 0.547,
+      "n_points": 22
+    },
+    "Ladakh": {
+      "rmse": 13.23,
+      "mae": 8.614,
+      "nse": 0.218,
+      "n_points": 22
+    },
+    "Madhya Pradesh": {
+      "rmse": 20.177,
+      "mae": 9.467,
+      "nse": 0.137,
+      "n_points": 22
+    },
+    "Maharashtra": {
+      "rmse": 6.969,
+      "mae": 3.572,
+      "nse": 0.71,
+      "n_points": 22
+    },
+    "Manipur": {
+      "rmse": 14.496,
+      "mae": 8.041,
+      "nse": 0.292,
+      "n_points": 22
+    },
+    "Meghalaya": {
+      "rmse": 6.944,
+      "mae": 5.29,
+      "nse": 0.268,
+      "n_points": 22
+    },
+    "Mizoram": {
+      "rmse": 9.561,
+      "mae": 5.958,
+      "nse": -0.035,
+      "n_points": 22
+    },
+    "Nagaland": {
+      "rmse": 9.567,
+      "mae": 6.159,
+      "nse": 0.295,
+      "n_points": 22
+    },
+    "Odisha": {
+      "rmse": 6.417,
+      "mae": 4.89,
+      "nse": 0.111,
+      "n_points": 22
+    },
+    "Punjab": {
+      "rmse": 8.366,
+      "mae": 5.822,
+      "nse": 0.381,
+      "n_points": 22
+    },
+    "Sikkim": {
+      "rmse": 9.099,
+      "mae": 6.587,
+      "nse": 0.656,
+      "n_points": 22
+    },
+    "Tamil Nadu": {
+      "rmse": 11.125,
+      "mae": 8.009,
+      "nse": 0.343,
+      "n_points": 22
+    },
+    "Telangana": {
+      "rmse": 9.645,
+      "mae": 7.497,
+      "nse": 0.271,
+      "n_points": 22
+    },
+    "Tripura": {
+      "rmse": 10.424,
+      "mae": 7.211,
+      "nse": 0.202,
+      "n_points": 22
+    },
+    "Uttar Pradesh": {
+      "rmse": 3.405,
+      "mae": 2.5,
+      "nse": 0.877,
+      "n_points": 22
+    },
+    "Uttarakhand": {
+      "rmse": 3.768,
+      "mae": 2.965,
+      "nse": 0.789,
+      "n_points": 22
+    },
+    "West Bengal": {
+      "rmse": 4.704,
+      "mae": 2.827,
+      "nse": 0.608,
+      "n_points": 22
+    }
+  },
+  "random_forest_backtest": {
+    "flood": {
+      "events_tested": 2126,
+      "correctly_detected": 1209,
+      "missed_events": 917,
+      "false_alarms": 1848,
+      "true_negatives": 18656,
+      "precision": 0.395,
+      "recall": 0.569,
+      "f1": 0.467,
+      "roc_auc": 0.807
+    },
+    "landslide": {
+      "events_tested": 2195,
+      "correctly_detected": 1756,
+      "missed_events": 439,
+      "false_alarms": 5346,
+      "true_negatives": 15089,
+      "precision": 0.247,
+      "recall": 0.8,
+      "f1": 0.378,
+      "roc_auc": 0.852
+    }
+  },
+  "trained_at": "2026-09-20T14:44:36.653570+00:00",
+  "trained_with_sklearn": "1.5.2",
+  "training_rows": 67952
+}
