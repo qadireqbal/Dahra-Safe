@@ -1,0 +1,14 @@
+fastapi>=0.115
+uvicorn[standard]>=0.32
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.5
+statsmodels>=0.14
+joblib>=1.4
+apscheduler>=3.10
+websockets>=13.0
+requests>=2.32
+pydantic>=2.9
+python-multipart>=0.0.9
+qrcode>=7.4
+pillow>=10.0
